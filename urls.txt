@@ -1,0 +1,4 @@
+# NotebookLMに追加したいURLを1行ずつ記載
+# 例:
+# https://example.com/article1
+# https://example.com/article2
