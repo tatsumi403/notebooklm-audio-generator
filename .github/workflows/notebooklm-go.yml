@@ -1,0 +1,56 @@
+name: Add URLs to NotebookLM (Go)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'urls.txt'
+      - 'scripts/add_to_notebooklm.go'
+      - 'go.mod'
+      - 'go.sum'
+
+jobs:
+  process-urls:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.21'
+
+    - name: Install dependencies
+      run: |
+        go mod download
+        go mod tidy
+
+    - name: Install Chrome
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+
+    - name: Build application
+      run: |
+        cd scripts
+        go build -o ../bin/notebooklm-audio-generator add_to_notebooklm.go
+
+    - name: Run NotebookLM automation
+      env:
+        GOOGLE_ACCESS_TOKEN: ${{ secrets.GOOGLE_ACCESS_TOKEN }}
+        GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+      run: |
+        ./bin/notebooklm-audio-generator
+
+    - name: Commit processed URLs
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add .processed_urls.txt
+        git diff --quiet && git diff --staged --quiet || git commit -m "Update processed URLs [skip ci]"
+        git push
