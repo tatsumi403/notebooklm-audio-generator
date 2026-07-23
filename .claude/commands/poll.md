@@ -98,7 +98,7 @@ URL は行の `url` 列（例 `https://app.notion.com/<id>`）。**(準備)** �
 NOTION_URL="<行の url 列（Notion ページ URL）>"
 ART_URL="<記事URL（userDefined:URL 列）>"
 ISSUE_URL=$(gh issue create --repo tatsumi403/mylife \
-  --title "<記事タイトル: (c) の title。空なら記事URL>" \
+  --title "記事を読む: <記事タイトル: (c) の title。空なら記事URL>" \
   --body "$(printf '翻訳済み記事（Notion）: %s\n\n元記事: %s\n' "$NOTION_URL" "$ART_URL")")
 ITEM=$(gh project item-add "$PNUM" --owner tatsumi403 --url "$ISSUE_URL" --format json --jq '.id')
 gh project item-edit --id "$ITEM" --project-id "$PID" --field-id "$FIELD" --single-select-option-id "$OPT"
