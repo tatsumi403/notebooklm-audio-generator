@@ -1,105 +1,67 @@
-# NotebookLM Audio Generator
+# 記事翻訳 → Notion（英語記事を自然な日本語にして貯める）
 
-URLを追加するだけでNotebookLMに自動的にソースとして登録し、音声解説を生成します。
+英語記事の URL を Notion に貼るだけで、自然な日本語訳（冒頭に要約付き）を
+その Notion ページに保存するツール。翻訳の実行は Claude Code の **`/poll`** コマンドで都度行う。
 
-## 🚀 実装バージョン
+> 旧版は Google NotebookLM をブラウザ自動操作して音声生成する設計だったが、
+> OAuth が使えず動かなかったため、この構成に作り直した（履歴は git に残っている）。
 
-このプロジェクトはPythonとGo言語の2つのバージョンを提供しています:
+## 使い方（日常運用）
 
-### Python版 (scripts/add_to_notebooklm.py)
-- Selenium + webdriver-managerを使用
-- 従来の実装、安定動作確認済み
+1. Notion の DB **「記事翻訳キュー」** に行を追加し、`URL` 列に英語記事の URL を貼る
+   （PC でもスマホでも可。何件でも溜めてよい）。
+   - DB: https://app.notion.com/p/8ee50b66c1c34c5494050d5b5a6c5174
+2. 翻訳したくなったら、このリポジトリで Claude Code を開き **`/poll`** と入力する。
+3. 未処理の行がまとめて処理され、各ページ本文に「要約 → 全文（日本語訳）」が入り、
+   `Status` が `完了` になる。
 
-### Go版 (scripts/add_to_notebooklm.go) ⭐ 推奨
-- chromedpを使用した純粋なGo実装
-- **メリット:**
-  - バイナリ1つで動作、Python環境不要
-  - 高速起動・低メモリ使用量
-  - 型安全性によるバグ削減
-  - 並行処理が容易
+トリガーはこの `/poll` だけ。ポーリングや常駐はしない（打った時だけ動く）。
 
-## 使い方
+## 仕組み
 
-1. `urls.txt` に追加したいURLを1行ずつ記載
-2. Git commit & push
-3. GitHub Actionsが自動実行され、NotebookLMに追加・音声生成
+```
+[Notion DB に URL を貼る (Status=未処理)]
+            │  ← 好きなタイミングで /poll
+            ▼
+[Claude Code /poll]
+  1. Notion MCP で未処理行を取得
+  2. Status=処理中 に更新
+  3. src/extract.py で記事本文を抽出（trafilatura）
+  4. Claude 自身が自然な日本語に翻訳＋要約
+  5. Notion MCP でページ本文に要約＋全文を書き込み
+  6. Status=完了・処理日時 を記録（失敗時は Status=エラー）
+```
+
+- **翻訳**は Claude Code 自身が行う（外部 API キー不要）。
+- **Notion 連携**は Claude Code の MCP コネクタ経由（インテグレーショントークン不要）。
+- **記事抽出**だけ Python（`trafilatura`）に切り出している。
 
 ## セットアップ
 
-### 1. OAuth認証情報の取得
-
-1. [Google Cloud Console](https://console.cloud.google.com/) にアクセス
-2. 新しいプロジェクトを作成
-3. 「APIとサービス」→「認証情報」
-4. 「OAuth 2.0 クライアントID」を作成
-5. アクセストークンとリフレッシュトークンを取得
-
-### 2. GitHub Secretsの設定
-
-リポジトリの Settings → Secrets and variables → Actions で以下を追加:
-
-- `GOOGLE_ACCESS_TOKEN`: Googleアクセストークン
-- `GOOGLE_REFRESH_TOKEN`: Googleリフレッシュトークン
-
-## ローカルでの実行
-
-### Go版を使用する場合 (推奨)
-
 ```bash
-# 依存関係のインストール
-make deps
-
-# ビルド
-make build
-
-# 実行 (環境変数を設定して)
-export GOOGLE_ACCESS_TOKEN="your_token"
-export GOOGLE_REFRESH_TOKEN="your_refresh_token"
-make run
-
-# または直接実行
-./bin/notebooklm-audio-generator
+make setup          # .venv 作成 + trafilatura インストール
 ```
 
-### Python版を使用する場合
+Notion 側は既に DB 作成済み。MCP コネクタが接続済みであればトークン設定は不要。
+
+## 単体テスト
 
 ```bash
-# 依存関係のインストール
-pip install -r scripts/requirements.txt
-
-# 実行
-python scripts/add_to_notebooklm.py
+make extract URL=https://example.com/some-article   # 記事抽出だけ確認（JSON 出力）
 ```
 
-## 開発
+翻訳〜Notion 保存まで通すには Claude Code で `/poll` を実行する。
 
-### Go版の開発
+## ファイル構成
 
-```bash
-# コードフォーマット
-make fmt
+| パス | 役割 |
+|---|---|
+| `.claude/commands/poll.md` | `/poll` の手順書（実行の本体。運用値の単一情報源） |
+| `src/extract.py` | 記事 URL → 本文/タイトル抽出（trafilatura） |
+| `requirements.txt` | Python 依存（trafilatura） |
+| `Makefile` | `setup` / `extract` |
 
-# リンター実行
-make lint
+## 今後（フェーズ2・未実装）
 
-# テスト実行
-make test
-
-# ビルド成果物のクリーンアップ
-make clean
-```
-
-## GitHub Actions
-
-プロジェクトには2つのワークフローがあります:
-
-- `.github/workflows/notebooklm-go.yml` - Go版 (デフォルト)
-- `.github/workflows/notebooklm.yml` - Python版
-
-Go版のワークフローがデフォルトで有効になっています。Python版を使用したい場合は、Go版のワークフローを無効化してください。
-
-## 注意事項
-
-- 初回はSeleniumのセレクタ調整が必要な場合があります
-- NotebookLMのUI変更に応じてスクリプト修正が必要な場合があります
-- Go版はchromedpを使用しているため、ChromeDriverの手動インストールは不要です
+要約＋全文を素材に「2 人の対話台本」を生成し、TTS で音声（ラジオ風）にして
+Notion に添付する拡張を想定している。

@@ -1,0 +1,2 @@
+# 記事本文の抽出に使用（src/extract.py）
+trafilatura>=1.8,<2.0
