@@ -1,0 +1,27 @@
+# 記事翻訳 → Notion 連携 の設定（非機密。認証トークンは含めない）
+#
+# Notion 連携は Claude Code の MCP コネクタ経由で行う。
+# ここに書くのは「どの DB を対象にするか」等の識別子だけ。
+
+notion:
+  # 対象データベース（親: 「黒田_作業ドキュメント」配下）
+  database_url: "https://app.notion.com/p/8ee50b66c1c34c5494050d5b5a6c5174"
+  # query-data-sources / notion-update-page で使う data source
+  data_source_url: "collection://b87c8503-94f1-4e6e-bcf2-1cda324267b6"
+  data_source_id: "b87c8503-94f1-4e6e-bcf2-1cda324267b6"
+
+  # プロパティ名（MCP の update_properties で使うキー名）
+  properties:
+    title: "Title"
+    url: "userDefined:URL"        # "url" という名前は userDefined: 接頭辞が必須
+    status: "Status"
+    processed_at_start: "date:処理日時:start"
+    processed_at_is_datetime: "date:処理日時:is_datetime"
+    error: "エラー"
+
+  # Status の値
+  status:
+    todo: "未処理"
+    processing: "処理中"
+    done: "完了"
+    error: "エラー"
