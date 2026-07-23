@@ -42,7 +42,7 @@
 make setup          # .venv 作成 + trafilatura インストール
 ```
 
-Notion 側は既に DB 作成済み（`config.yaml` に ID を記録）。MCP コネクタが接続済みであればトークン設定は不要。
+Notion 側は既に DB 作成済み。MCP コネクタが接続済みであればトークン設定は不要。
 
 ## 単体テスト
 
@@ -56,9 +56,8 @@ make extract URL=https://example.com/some-article   # 記事抽出だけ確認�
 
 | パス | 役割 |
 |---|---|
-| `.claude/commands/poll.md` | `/poll` の手順書（実行の本体。MCP + 抽出の統合） |
+| `.claude/commands/poll.md` | `/poll` の手順書（実行の本体。運用値の単一情報源） |
 | `src/extract.py` | 記事 URL → 本文/タイトル抽出（trafilatura） |
-| `config.yaml` | 対象 DB / data source ID、プロパティ名、Status 値（非機密） |
 | `requirements.txt` | Python 依存（trafilatura） |
 | `Makefile` | `setup` / `extract` |
 

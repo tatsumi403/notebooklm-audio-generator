@@ -41,20 +41,17 @@ make extract URL=<記事URL> # 記事抽出だけの単体テスト（JSON を s
 
 ## Notion DB「記事翻訳キュー」
 
-`config.yaml` に識別子を記録。親ページ「黒田_作業ドキュメント」配下に作成済み。
-
-- data source: `collection://b87c8503-94f1-4e6e-bcf2-1cda324267b6`
-- プロパティ（MCP `update_properties` のキー名）: `Title` / `userDefined:URL`(=URL 列) /
-  `Status`(select: 未処理/処理中/完了/エラー) / `date:処理日時:start` / `date:処理日時:is_datetime` / `エラー`
-- `Status` 空 or `未処理` を処理対象、`完了`/`処理中` はスキップ（冪等）。
+親ページ「黒田_作業ドキュメント」配下に作成済み。**運用値（data source ID・プロパティ名・Status 値）の
+単一の情報源は `.claude/commands/poll.md`**（`/poll` は poll.md の手順どおりにしか動かないため）。
+ここでは同じ値を再掲せず、扱う上での注意点だけ記す。
 
 **注意:** `url`/`id` という名のプロパティは MCP 上 `userDefined:` 接頭辞が必須（URL 列 → `userDefined:URL`）。
-`query-data-sources` の結果 `url` 列は各行の **page_id**（更新時に使用）。
+`query-data-sources` の結果 `url` 列は各行の **page_id**（更新時に使用）。`Status` 空 or `未処理` が処理対象、
+`完了`/`処理中` はスキップ（冪等）。
 
 ## 変更時の注意
 
-- 処理フローや Notion のプロパティ/Status を変えたら、`.claude/commands/poll.md` と `config.yaml` の
-  両方を必ず同期する（`/poll` は poll.md の手順どおりにしか動かない）。
+- 処理フローや Notion のプロパティ/Status を変えたら、`.claude/commands/poll.md` を更新する（運用値の唯一の置き場）。
 - MCP ツール名は Notion コネクタ（`query-data-sources` / `notion-update-page` / `fetch` など）を使用。
 
 ## フェーズ2（未実装）

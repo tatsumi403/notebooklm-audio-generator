@@ -18,20 +18,19 @@ def extract(url: str) -> dict:
     if not downloaded:
         raise RuntimeError(f"URL を取得できませんでした（到達不可 / タイムアウト等）: {url}")
 
-    result = trafilatura.extract(
+    data = trafilatura.bare_extraction(
         downloaded,
-        output_format="json",
         with_metadata=True,
         include_comments=False,
         include_tables=True,
         favor_recall=True,
+        as_dict=True,
     )
-    if not result:
+    if not data:
         raise RuntimeError(
             "本文を抽出できませんでした（JS 必須ページ / ペイウォール / 本文が短すぎる可能性）"
         )
 
-    data = json.loads(result)
     text = (data.get("text") or "").strip()
     if not text:
         raise RuntimeError("本文が空でした")

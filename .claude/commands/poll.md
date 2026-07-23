@@ -5,7 +5,7 @@ description: Notion「記事翻訳キュー」の未処理URLを翻訳して本�
 Notion の「記事翻訳キュー」DB にある **未処理の記事 URL** を順に処理する。
 1 回の実行で未処理分をすべて処理する。以下を厳密に実行すること。
 
-## 対象（config.yaml と一致）
+## 対象（このファイルが運用値の単一情報源）
 - data source: `collection://b87c8503-94f1-4e6e-bcf2-1cda324267b6`
 - Status 値: 未処理 / 処理中 / 完了 / エラー
 - プロパティ更新キー: `Title` / `userDefined:URL` / `Status` / `date:処理日時:start` / `date:処理日時:is_datetime` / `エラー`

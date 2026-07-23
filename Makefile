@@ -1,4 +1,4 @@
-.PHONY: setup extract fmt lint clean help
+.PHONY: setup extract clean help
 
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -15,12 +15,6 @@ setup:
 extract:
 	@test -n "$(URL)" || (echo "usage: make extract URL=<記事URL>" && exit 64)
 	@$(PY) src/extract.py "$(URL)"
-
-fmt:
-	@$(PY) -m black src/ 2>/dev/null || echo "(black 未導入。スキップ)"
-
-lint:
-	@$(PY) -m pyflakes src/ 2>/dev/null || echo "(pyflakes 未導入。スキップ)"
 
 clean:
 	@rm -rf $(VENV) src/__pycache__
