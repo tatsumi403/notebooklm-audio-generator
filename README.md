@@ -13,7 +13,8 @@
    - DB: https://app.notion.com/p/8ee50b66c1c34c5494050d5b5a6c5174
 2. 翻訳したくなったら、このリポジトリで Claude Code を開き **`/poll`** と入力する。
 3. 未処理の行がまとめて処理され、各ページ本文に「要約 → 全文（日本語訳）」が入り、
-   `Status` が `完了` になる。
+   `Status` が `完了` になる。さらに `tatsumi403/mylife` に記録用の GitHub Issue が作られ、
+   本文に生成した Notion ページ URL が貼られる（Project「my life ロードマップ」/ Priority「1週間以内」）。
 
 トリガーはこの `/poll` だけ。ポーリングや常駐はしない（打った時だけ動く）。
 
@@ -30,11 +31,15 @@
   4. Claude 自身が自然な日本語に翻訳＋要約
   5. Notion MCP でページ本文に要約＋全文を書き込み
   6. Status=完了・処理日時 を記録（失敗時は Status=エラー）
+  7. mylife に記録用 GitHub Issue を作成（Notion URL を貼付／Project・Priority を設定）
 ```
 
 - **翻訳**は Claude Code 自身が行う（外部 API キー不要）。
 - **Notion 連携**は Claude Code の MCP コネクタ経由（インテグレーショントークン不要）。
 - **記事抽出**だけ Python（`trafilatura`）に切り出している。
+- **記録用 Issue** を `tatsumi403/mylife` に作成し、生成した Notion ページ URL を本文に貼る
+  （Project「my life ロードマップ」／ Priority「1週間以内」。アサインと Status は Project 側の
+  自動化で設定される）。Issue 作成には `gh` の `project` スコープが必要（`gh auth refresh -s project`）。
 
 ## セットアップ
 
