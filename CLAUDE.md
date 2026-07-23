@@ -32,7 +32,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **翻訳は Claude 自身**が担当。`translate.py` や `gemini` 依存は持たない。
 - **記事抽出のみ Python**（`src/extract.py`）に切り出し。
 - **GitHub Issue 連携は `gh` CLI 経由**（`project` スコープ必須）。Project 番号・フィールド ID・オプション ID は
-  ハードコードせず、Project 名「my life ロードマップ」とオプション名「1週間以内」から実行時に解決する。
+  ハードコードせず、Project 名とオプション名から実行時に解決する（具体値は poll.md が単一情報源）。
 
 ## コマンド
 
