@@ -91,11 +91,13 @@ read -r FIELD OPT <<<"$(gh project field-list "$PNUM" --owner tatsumi403 --forma
      - `エラー`: `null`（既存のエラーがあれば消す）
 
 **(e) mylife に記録用 GitHub Issue を作成（(d) の Notion 書き込みが成功した行だけ）**
-記録用 Issue を `tatsumi403/mylife` に作り、Project 追加と Priority 設定まで行う。Notion ページの
-URL は行の `url` 列（例 `https://app.notion.com/<id>`）。**(準備)** で解決した `PNUM`/`PID`/`FIELD`/`OPT`
-をそのまま使う（Status・アサインは Project 自動化に任せ、指定しない）:
+記録用 Issue を `tatsumi403/mylife` に作り、Project 追加と Priority 設定まで行う。
+`NOTION_URL`（翻訳済み記事の Notion ページ URL）は、行の `url` 列（`https://app.notion.com/<id>` 形式）の
+ホスト直後に **`/p/` を挿入**した `https://app.notion.com/p/<id>` を使う。`url` 列の値そのままは page_id 用で、
+ブラウザでは 404（`This page couldn't be found`）になる（`fetch` が返すページの正規 URL は `/p/` 付き）。
+`PNUM`/`PID`/`FIELD`/`OPT` は **(準備)** で解決した値をそのまま使う（Status・アサインは Project 自動化に任せ、指定しない）:
 ```bash
-NOTION_URL="<行の url 列（Notion ページ URL）>"
+NOTION_URL="https://app.notion.com/p/<行の url 列の id 部分>"
 ART_URL="<記事URL（userDefined:URL 列）>"
 ISSUE_URL=$(gh issue create --repo tatsumi403/mylife \
   --title "記事を読む: <記事タイトル: (c) の title。空なら記事URL>" \
