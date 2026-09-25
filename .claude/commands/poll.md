@@ -13,7 +13,7 @@ Notion の「記事翻訳キュー」DB にある **未処理の記事 URL** を
 - GitHub Issue 連携（翻訳完了後に記録用 Issue を作る先）:
   - リポジトリ: `tatsumi403/mylife`（owner: `tatsumi403`）
   - Project: `my life ロードマップ`
-  - Priority: 単一選択オプション `1週間以内`（Status・アサインは Project 側の自動化に任せ、**設定しない**）
+  - Status: 単一選択フィールド `Status` のオプション `Backlog` のみ設定（Priority・アサインは**設定しない**）
   - 認証: `gh` に `project` スコープが必要（無ければ `gh auth refresh -s project`）
 
 ## 手順
@@ -38,11 +38,11 @@ WHERE "Status" = '未処理' OR "Status" IS NULL OR "Status" = ''
 # Project 番号(PNUM)と node id(PID)
 read -r PNUM PID <<<"$(gh project list --owner tatsumi403 --format json \
   --jq '.projects[] | select(.title=="my life ロードマップ") | "\(.number) \(.id)"')"
-# 「1週間以内」オプションを持つ単一選択フィールドの field id と option id
+# Status フィールドの field id と「Backlog」の option id
 read -r FIELD OPT <<<"$(gh project field-list "$PNUM" --owner tatsumi403 --format json \
-  --jq '.fields[] | .id as $fid | .options[]? | select(.name=="1週間以内") | "\($fid) \(.id)"')"
+  --jq '.fields[] | select(.name=="Status") | .id as $fid | .options[]? | select(.name=="Backlog") | "\($fid) \(.id)"')"
 ```
-`PNUM`/`PID`/`FIELD`/`OPT` のいずれかが空なら Project 名／オプション名が変わった可能性。直すまで各行の (e) はスキップする。
+`PNUM`/`PID`/`FIELD`/`OPT` のいずれかが空なら Project 名／フィールド名／オプション名が変わった可能性。直すまで各行の (e) はスキップする。
 
 **(a) 処理中にする** — `notion-update-page`:
 - `page_id`: 行の `url`
@@ -91,11 +91,11 @@ read -r FIELD OPT <<<"$(gh project field-list "$PNUM" --owner tatsumi403 --forma
      - `エラー`: `null`（既存のエラーがあれば消す）
 
 **(e) mylife に記録用 GitHub Issue を作成（(d) の Notion 書き込みが成功した行だけ）**
-記録用 Issue を `tatsumi403/mylife` に作り、Project 追加と Priority 設定まで行う。
+記録用 Issue を `tatsumi403/mylife` に作り、Project 追加と Status=`Backlog` の設定まで行う。
 `NOTION_URL`（翻訳済み記事の Notion ページ URL）は、行の `url` 列（`https://app.notion.com/<id>`）の
 ホスト直後に **`/p/` を挿入**して作る。`url` 列の値そのままは page_id 用で、ブラウザでは
 404（`This page couldn't be found`）になる。
-`PNUM`/`PID`/`FIELD`/`OPT` は **(準備)** で解決した値をそのまま使う（Status・アサインは Project 自動化に任せ、指定しない）:
+`PNUM`/`PID`/`FIELD`/`OPT` は **(準備)** で解決した値をそのまま使う（Priority・アサインは指定しない）:
 ```bash
 NOTION_URL="https://app.notion.com/p/<url 列の id 部分>"
 ART_URL="<記事URL（userDefined:URL 列）>"
@@ -106,7 +106,7 @@ ITEM=$(gh project item-add "$PNUM" --owner tatsumi403 --url "$ISSUE_URL" --forma
 gh project item-edit --id "$ITEM" --project-id "$PID" --field-id "$FIELD" --single-select-option-id "$OPT"
 ```
 
-Issue 作成〜Priority 設定のどこかで失敗した場合: Notion の翻訳は既に `完了` なので **Status は変えず**、
+Issue 作成〜Status 設定のどこかで失敗した場合: Notion の翻訳は既に `完了` なので **Status は変えず**、
 `エラー` 欄に「Issue作成失敗: <理由>」を記録し、最後のまとめで報告する（後で手動で Issue を作成する）。
 本文の二重挿入・再翻訳を招くため、この行を `未処理`/`エラー` に戻さない。
 

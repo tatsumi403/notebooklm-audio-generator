@@ -24,7 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 5. Notion MCP でページ本文に「要約→全文」を書き込み（`notion-update-page`）
 6. `Status=完了`・処理日時 を記録（失敗時は `Status=エラー`＋メッセージ）
 7. `tatsumi403/mylife` に記録用 GitHub Issue を作成（`gh`）。本文に生成した Notion ページ URL を貼り、
-   Project「my life ロードマップ」に追加、Priority「1週間以内」を設定（Status・アサインは Project 自動化に委譲）
+   Project「my life ロードマップ」に追加、Status「Backlog」を設定（Priority・アサインは設定しない）
 
 設計上の要点:
 - **Notion 連携は MCP 経由**。インテグレーショントークンは使わない（発行不可のため）。
@@ -56,7 +56,7 @@ make extract URL=<記事URL> # 記事抽出だけの単体テスト（JSON を s
 ## 変更時の注意
 
 - 処理フローや Notion のプロパティ/Status を変えたら、`.claude/commands/poll.md` を更新する（運用値の唯一の置き場）。
-- GitHub Issue 連携先（repo / Project 名 / Priority オプション名）を変えた場合も `poll.md` を更新する。
+- GitHub Issue 連携先（repo / Project 名 / Status オプション名）を変えた場合も `poll.md` を更新する。
 - MCP ツール名は Notion コネクタ（`query-data-sources` / `notion-update-page` / `fetch` など）を使用。
 
 ## フェーズ2（未実装）
